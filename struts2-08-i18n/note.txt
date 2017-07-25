@@ -1,0 +1,56 @@
+1. 国际化的目标
+
+	1). 如何配置国际化资源文件：
+		i. 	类级范围资源文件： 
+			在Action类文件所在的路径下建立名为ActionName_language_country.properties的文件，只使用于该ActionName类
+			例如：
+				***Action_zh_CN.properties
+				***Action_en_US.properties
+				
+		ii.	包级范围资源文件：
+			 在Action类文件所在的包的根路径下建立名为package_language_country.properties的属性文件,一旦建立，处于该包下的所有Action都适用
+			注意：包范围资源文件的basename就是package(固定)，而不是Action所在的包名
+			例如：
+				package_zh_CN.properties
+				package_en_US.properties
+				
+		iii.全局范围资源文件：
+			 命名方式：basename_language_country.properties,适用于所有的包
+			 注意：需要在struts.xml中配置属性，<constant name="struts.custom.i18n.resources" value="XXX"></constant>
+			 例如：
+			 	XXX_zh_CN.properties
+				XXX_en_US.properties
+				
+		iv.国际化资源文件加载的顺序如何呢？
+			离当前Action较近的将被优先加载
+	
+	2). 如何在页面上和Action类中访问国际化资源文件的value值
+		i.在Action类中，如果Action类中实现了TextProvider接口，则可以调用其getText()方法获取value值。
+			> 继承ActionSupport的方式即可。
+			
+		ii.页面上可以使用s:text标签，对于表单标签可以使用表单标签的key属性值
+			> 若有占位符，则可以使用s:text标签的s:param子标签来填充占位符
+				time=Time:{0}
+				<s:text name="time">
+					<s:param value="date"></s:param>
+				</s:text>
+		
+			> 也可以利用标签和OGNL表达式直接访问ValueStack中的属性值，包括对象栈和Map栈
+				time2=Time:${date}
+				<s:text name="time2"></s:text>
+				
+	3). 实现通过超链接切换语言：
+		具体确定locale对象的过程：
+			> struts2使用i18n拦截器处理国际化资源，并且将其注册在默认的拦截器栈中；
+			> i18n拦截器在执行Action方法前，自动去查找一个名为request_locale的请求参数。
+				如果该参数存在，拦截器就将其作为参数，转换成Locale对象，并将其作为用户默认的Locale语言，并将其保存到session里的WW_TRANS_I18N_LOCALE属性值中
+			> 若request中没有名为request_locale的请求参数，则i18n拦截器会从session中获取WW_TRANS_I18N_LOCALE的属性值
+				若该值不为空，则将该属性值设置为浏览器默认的Locale语言
+			> 若session中的WW_TRANS_I18N_LOCALE属性值仍为空，则从ActionContext中户获取Locale对象。
+			
+		具体实现：
+			只需要在超链接的后面附着request_locale的请求参数，值为语言国家代码
+			<s:a href="testI18n.action?request_locale=en_US">English</s:a>
+			<s:a href="testI18n.action?request_locale=zh_CN">中文</s:a>
+		注意：
+			超链接必须是一个struts2的请求，因为i18n拦截器需要经过Action，才能是i18n拦截器工作！

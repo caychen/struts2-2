@@ -1,0 +1,20 @@
+1、在Action中访问WEB资源
+	1）、什么是WEB资源
+		HttpServletRequest，HttpSession，ServletContext等原生的Servlet API
+		
+	2）、为什么访问WEB资源
+		B/S的应用Controller中必然需要访问WEB资源：向域对象中进行读写
+	
+	3）、如何访问？
+		（1）、和Servlet API解耦的方式：
+			> 使用ActionContext
+			> 实现xxxAware接口
+			
+			> 选用的建议：
+				若一个Action类中有多个action方法，且多个方法都需要使用域对象的Map或parameters，则建议使用实现aware接口
+				
+			> session对应的Map实际上是SessionMap类型的，若强转后调用其invalidate()方法，可以使session失效
+			
+		（2）、和Servlet API耦合的方式：
+			> 使用ServletActionContext
+			> 实现ServletxxxAware接口

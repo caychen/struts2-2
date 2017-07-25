@@ -1,0 +1,42 @@
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator 1.0.3//EN"
+        "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+
+<validators>
+	<!-- 针对age属性进行验证,基于字段的验证 -->
+	<field name="age">
+		<!-- 设置短路验证：即第一个验证失败的话，则不再进行下面的验证，而是直接只显示第一个验证错误提示， 如果验证成功，继续验证第二个，以此类推。 -->
+		<field-validator type="conversion" short-circuit="true">
+			<message>Conversion Error</message>
+		</field-validator>
+		
+		<field-validator type="int">
+			<param name="min">20</param>
+			<param name="max">50</param>
+			<!-- <message>Age needs to be between ${min} and ${max}</message> -->
+			<message key="error.int"></message>
+		</field-validator>
+	</field>
+	
+	<field name="count">
+		<field-validator type="int">
+			<param name="min">1</param>
+			<param name="max">10</param>
+			<!-- <message>Age needs to be between ${min} and ${max}</message> -->
+			<message key="error.int"></message>
+		</field-validator>
+	</field>
+	
+	<field name="idCard">
+		<field-validator type="idCard">
+			<!-- <message>Age needs to be between ${min} and ${max}</message> -->
+			<message>This is not a correct idcard!</message>
+		</field-validator>
+	</field>
+	
+	<!-- 测试非字段验证 -->
+	<validator type="expression">
+		<param name="expression"><![CDATA[password==password2]]></param>
+		<message>Password is not equal to Password2!</message>
+	</validator>
+</validators>

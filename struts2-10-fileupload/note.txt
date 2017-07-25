@@ -1,0 +1,42 @@
+文件的上传:
+
+1. 表单需要主要的3点：
+	enctype为multipart/form-data， 
+	method为post
+	type为file
+	
+2. Struts2的文件上传实际使用的是apache Commons FileUpload组件，所以需要导入
+	commons-fileupload-xxx.jar
+	commons-io-xxx.jar
+	
+3. Struts2进行文件上传需要使用FileUploadInterceptor拦截器
+
+4. 基本的文件上传：直接在Action中定义如下3个属性， 并提供对应的getter和setter方法
+	[File Name] : File - the actual File
+	[File Name]ContentType : String - the content type of the file
+	[File Name]FileName : String
+	
+5. 使用IO进行文件的上传即可。
+	
+6. 一次性传多个文件怎么办？
+	若上传多个文件，则上述的三个属性可以改为List类型,多个文件域的name属性值需要一致。
+
+7. 可以对上传的文件进行限制吗？例如扩展名，内容类型，上传文件大小等？若可以，则若出错，如何显示错误信息？
+	答：可以。
+	可以通过配置FileUploadInterceptor拦截器的参数的方式来进行限制。
+		maximumSize：默认单个文件的最大值为2M， 
+		allowedTypes：允许上传文件的类型，多个使用逗号分隔
+		allowedExtensions：允许上传文件的扩展名，多个使用逗号分隔 
+	
+	注意在struts2-core-xxx.jar下的org.apache.struts2包下的default.properties文件中有对上传的文件总的大小的限制，
+	可以使用常量的方式来修改该限制。
+		struts.multipart.maxSize=2097152
+	
+	定制错误信息，可以在国际化资源文件中定义如下的键：
+		struts.messages.error.uploading：文件上传出错的消息
+		struts.messages.error.file.too.large：文件上传超过限制的错误消息
+		struts.messages.error.content.type.not.allowed：文件内容类型不合法的错误消息
+		struts.messages.error.file.extension.not.allowed：文件扩展名不合法的错误消息
+		
+	此种方法定制的消息并不完善，可以参考struts2-core-xxx.jar下的org.apache.struts2包下的struts-messages.properties文件，
+	可以提供更多的提示消息。

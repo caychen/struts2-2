@@ -1,0 +1,18 @@
+自定义拦截器：
+	1. 具体步骤
+		i. 定义一个拦截器的类
+			> 可以实现Interceptor接口
+			> 也可以继承AbstractInterceptor抽象类
+		
+		ii. 在struts.xml配置文件中进行配置
+			<interceptors>
+				<interceptor name="hello" class="org.com.cay.interceptor.MyInterceptor"></interceptor>
+			</interceptors>
+			<action name="helloAction" class="org.com.cay.action.HelloAction">
+				<interceptor-ref name="hello"></interceptor-ref>
+				<result>/success.jsp</result>
+			</action>
+			
+	2. 注意：
+		在自定义的拦截器中可以选择不调用ActionInvocation的invoke()方法，那么后续的拦截器和Action方法不会被调用，
+		Struts会渲染自定义拦截器intercept方法返回值对应的result

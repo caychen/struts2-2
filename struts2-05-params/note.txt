@@ -1,0 +1,20 @@
+使用 paramsPrepareParamsStack 拦截器栈后的运行流程：
+	1).	paramsPrepareParamsStack 和 defaultStack 一样都是拦截器栈，而后者为struts2默认的拦截器栈
+	
+	2).	可以在struts.xml配置文件中通过以下方式修改默认的拦截器栈
+		<default-interceptor-ref name="paramsPrepareParamsStack"></default-interceptor-ref>
+		
+	3).	paramsPrepareParamsStack 拦截器在于 params -> modelDriven -> params
+		所以可以先把请求参数赋给action对应的属性，再根据赋给action的那个属性值来决定压到值栈栈顶的对象，最后再为栈顶对象的属性进行赋值。
+		
+		对于update 操作而言：
+			i. 	先为EmployeeAction 的id进行赋值
+			ii.	根据id从数据库中加载对应的对象,并放入到值栈的栈顶
+			iii.再为栈顶对象的id赋值
+			iv.	把栈顶对象的属性回显到表单中
+			
+	4). 关于回显：struts2表单标签会从值栈中获取对应的属性值进行回显
+	
+	5). 存在的问题：
+		i.	在执行删除的时候，id不为null， 但getModel方法却从数据库中加载了一个对象，其实该对象没什么用处。
+		ii.	执行查询全部信息时， id为null，但是getModel方法却new了一个Employee对象，其实也浪费了。

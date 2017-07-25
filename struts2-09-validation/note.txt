@@ -1,0 +1,102 @@
+1. Struts2的验证：
+	1). 验证分为两种：
+		> 声明式验证
+			>> 对哪个Action或者Model的哪个字段进行验证
+			>> 使用什么验证规则
+			>> 如果验证失败，转向哪一个页面，显示什么错误提示信息
+		
+		> 编程式验证
+		
+	2). 声明式验证的过程：
+		i. 先确定对哪个Action的哪个字段进行验证；
+		ii.编写配置文件
+			> 在当前的Action或者Model的同一包下建立xxx-validation.xml文件，xxx与Action或者Model的类名保持一致
+			> 编写验证规则
+			> 在配置文件中可以定义错误提示信息：
+				例如：
+					<field name="age">
+						<field-validator type="int">
+							<param name="min">20</param>
+							<param name="max">50</param>
+							<message>Age needs to be between ${min} and ${max}</message>
+						</field-validator>
+					</field>
+					
+			> 该错误信息可以使用国际化资源文件
+				在xxx-validation.xml中的message标签中，使用key属性来指定国际化资源文件中的key值
+				例如：<message key="error.int"></message>
+				然后在国际化资源文件中新建error.int的键值对。
+				
+		iii. 如果验证失败，则转向name为input的result，所以需要在struts.xml的action中添加name=input的result；
+		iv. 错误提示信息的显示
+			> 若使用的是Struts2的form标签, 则会自动显示错误信息
+			> 若使用的是simple主题，则需要使用s:fielderror标签或者直接使用EL表达式(OGNL表达式)
+			
+	3). 注意：若一个Action类可以应答多个action请求，多个action请求使用不同的验证规则，怎么办？
+		> 为每一个不同的action请求定义其对应的验证文件：ActionClassName-AliasName-validation.xml，该别名一般为请求的action的名字，
+			如：TestValidationAction-testValidation2-validation.xml，其中testValidation2为请求的action的名字
+		> 不带别名的配置文件：ActionClassName-validation.xml中的验证规则依然会发生作用，所以建议把各个action公用的验证规则配置在其中,
+			而适用于某个action的请求的验证规则就不要再配置在ActionClassName-validation.xml文件中，而是配置在ActionClassName-AliasName-validation.xml文件中
+		
+	4). 声明式验证框架的原理：
+		> Struts2默认的拦截器栈中提供了一个validation拦截器
+		
+		> 每个具体的验证规则都会对应具体的验证器，有一个配置文件把验证规则和验证器关联起来，实际上验证的是那个验证器。
+			该文件位于com.opensymphony.xwork2.validator.validators包下的default.xml
+			
+	5). 短路验证：
+		若对一个字段使用多个验证器，默认情况下会执行所有的验证。若希望前面的验证没有通过的话，后面的不再进行验证，可以使用短路验证。
+		如：
+			<!-- 
+				设置短路验证：即第一个验证失败的话，则不再进行下面的验证，而是直接只显示第一个验证错误提示，
+				如果验证成功，继续验证第二个，以此类推。 
+			-->
+			<field-validator type="conversion" short-circuit="true">
+				<message>Conversion Error</message>
+			</field-validator>
+			
+	6). 若类型转换失败，默认情况下，还会执行后面的拦截器，进行验证。可以通过修改ConversionErrorInterceptor源代码的方式使
+		当类型转换失败后，不再执行后序的验证拦截器，而是直接返回name为input的result。
+		
+		Object action = invocation.getAction();
+        if(action instanceof ValidationAware){
+        	ValidationAware va = (ValidationAware) action;
+        	
+        	if(va.hasFieldErrors() || va.hasActionErrors())
+        		return "input";
+        }
+        
+    7). 关于非字段验证：不是针对于某一个字段的验证。
+    	<!-- 测试非字段验证 -->
+		<validator type="expression">
+			<param name="expression"><![CDATA[password==password2]]></param>
+			<message>Password is not equal to Password2!</message>
+		</validator>
+		
+		显示非字段验证的错误消息，使用<s:actionerror/>标签。
+		
+	8). 不同字段使用同样的验证规则，而且使用同样的响应消息？
+		答：在国际化资源文件中建立键值对，如
+			error.int=${getText(fieldName)} needs to be between ${min} and ${max}
+	
+			age=年龄
+			count=数量
+			
+	9). 自定义验证器：
+		i. 	定义一个验证器类
+			> 自定义的验证器都需要实现Validator接口.
+			> 可以选择继承ValidatorSupport或者FieldValidatorSupport类
+			> 若希望实现一个一般的验证器，则可以继承ValidatorSupport类
+			> 若希望实现一个字段的验证器，则可以继承FieldValidatorSupport类
+			> 具体实现可以参考目前已有的验证器
+			> 若验证程序需要接收一个输入参数，需要为这个参数增加一个相应的属性
+			
+		ii.	在配置文件中配置验证器
+			> 默认情况下， Struts2会在类路径的根目录下加载validators.xml文件，在该文件中加载验证器
+				该文件的定义方式同默认的验证器的配置文件：位于com.opensymphony.xwork2.validator.validators包下的default.xml
+			> 若类路径下没有指定的验证器，则从位于com.opensymphony.xwork2.validator.validators包下的default.xml中的验证器加载
+			
+		iii.使用
+		
+		iv. 自定义一个18位身份证验证器
+			> 与目前的验证器一样

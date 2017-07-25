@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+   
+<struts>
+	<constant name="struts.custom.i18n.resources" value="i18n"></constant>
+	<package name="default" namespace="/" extends="struts-default">
+		<interceptors>
+			<interceptor-stack name="cayStack">
+				<interceptor-ref name="defaultStack">
+					<param name="fileUpload.maximumSize">2000</param><!-- 2000个字节 -->
+					<param name="fileUpload.allowedTypes">text/html,text/xml</param>
+					<param name="fileUpload.allowedExtensions">html,xml,txt</param>
+				</interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		
+		<default-interceptor-ref name="cayStack"></default-interceptor-ref>
+		<action name="testUpload" class="org.com.cay.action.UploadAction">
+			<result>/success.jsp</result>
+		</action>
+		
+		<action name="testUpload2" class="org.com.cay.action.MultiUploadAction">
+			<result>/success.jsp</result>
+			<result name="input">/fileupload-multi.jsp</result>
+		</action>
+	</package>
+</struts>

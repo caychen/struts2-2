@@ -1,0 +1,37 @@
+Action 实现 ModelDriven 接口后的运行流程：
+	1）、先会执行 ModelDrivenInterceptor 拦截器的 intercept 方法:
+	
+		public String intercept(ActionInvocation invocation) throws Exception {
+			//获取Action 对象：EmployeeAction对象，此时该Action 已经实现了 ModelDriven 接口
+			//public class EmployeeAction implements ModelDriven<Employee>, RequestAware
+			
+	        Object action = invocation.getAction();
+	
+			//判断action 是否是 ModelDriven 的实例
+			
+	        if (action instanceof ModelDriven) {
+	        	//强制转换为 ModelDriven类型
+	            ModelDriven modelDriven = (ModelDriven) action;
+	            //获取值栈            
+	            ValueStack stack = invocation.getStack();
+	            //调用ModelDriven接口的getModel()方法，此时实际上是调用EmployeeAction的getModel()方法
+	            /*
+	            	public Employee getModel() {
+						employee = new Employee();
+						return employee;
+					}
+	            */
+	            Object model = modelDriven.getModel();
+	            if (model !=  null) {
+	            	//将getModel()方法的返回值压入到值栈的栈顶中，实际压入的是EmployeeAction的成员变量employee。
+	            	stack.push(model);
+	            }
+	            if (refreshModelBeforeResult) {
+	                invocation.addPreResultListener(new RefreshModelBeforeResult(modelDriven, model));
+	            }
+	        }
+	        return invocation.invoke();
+	    }
+	    
+	2）、然后执行ParametersInterceptor 拦截器的interceptor()方法:
+		把请求参数的值赋值给栈顶对象对应的属性,若栈顶对象没有对应的属性，则查询值栈中栈顶下一个对象的属性。

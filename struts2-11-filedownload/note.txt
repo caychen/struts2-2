@@ -1,0 +1,13 @@
+文件的下载：
+	1. Struts2中对文件的下载，使用type=stream的result进行下载即可
+	2. 可以为stream的result设定如下参数：
+		contentType：结果类型
+		contentLength：下载文件的长度
+		contentDisposition：设定content-disposition响应头,该响应头指定响应是一个文件下载类型，
+			一般设值为：attachment;filename="..."
+		inputName：指定文件输入流的getter定义的那个属性的名字，默认为inputStream
+		bufferSize：缓存区的大小，默认为1024
+		allowCaching：是否允许使用缓存
+		contentCharSet：指定下载的字符集
+		
+	3. 以上参数可以在Action中以getter方法的方式提供
